@@ -48,6 +48,7 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBVMAF_VERSION=2.1.1 \
             LIBVA_VERSION=2.16.0 \
             GMMLIB_VERSION=22.3.3 \
+            LIBMFX_VERSION=1.35.1 \
             INTEL_MEDIA_SDK_VERSION=21.3.5 \
             SRC=/usr/local
 
@@ -543,13 +544,13 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
-## libmfx
+## libmfx {LIBMFX_VERSION}
 RUN \
         DIR=/tmp/libmfx && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://github.com/lu-zero/mfx_dispatch/archive/master.tar.gz && \
-        tar -xz --strip-components=1 -f master.tar.gz && \
+        curl -sLO https://github.com/lu-zero/mfx_dispatch/archive/${LIBMFX_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f ${LIBMFX_VERSION}.tar.gz && \
         autoreconf -fiv && \
         ./configure --prefix="${PREFIX}" && \
         make && \
