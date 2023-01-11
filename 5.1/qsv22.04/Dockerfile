@@ -518,6 +518,7 @@ RUN \
         ./autogen.sh && \
         make && \
         make install
+        rm -rf ${DIR}
 
 ## gmmlib
 RUN \
@@ -528,9 +529,9 @@ RUN \
         curl -sLO https://github.com/intel/gmmlib/archive/intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DARCH=64 . && \
-        ./autogen.sh && \
         make && \
-        make install
+        make install && \
+        rm -rf ${DIR}
 
 ## MediaDriver
 RUN \ 
