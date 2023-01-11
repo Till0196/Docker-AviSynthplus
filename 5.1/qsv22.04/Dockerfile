@@ -540,7 +540,7 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \        
         curl -sLO https://github.com/intel/media-driver/archive/intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
-        tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz --depth 1 && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
         make && \
