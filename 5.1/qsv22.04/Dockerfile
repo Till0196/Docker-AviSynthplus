@@ -49,6 +49,7 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBVA_VERSION=2.16.0 \
             GMMLIB_VERSION=22.3.3 \
             LIBMFX_VERSION=1.35.1 \
+            INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=21.3.5 \
             SRC=/usr/local
 
@@ -526,10 +527,22 @@ RUN \
         cd ${DIR} && \
         curl -sLO https://github.com/intel/gmmlib/archive/intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DARCH=64 .. && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DARCH=64 . && \
         ./autogen.sh && \
         make && \
         make install
+
+## MediaDriver
+RUN \ 
+        DIR=/tmp/mediadriver && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO hhttps://github.com/intel/media-driver/archive/intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
+        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF . && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
 
 ## MediaSDK
 RUN \ 
@@ -539,7 +552,7 @@ RUN \
         cd ${DIR} && \        
         curl -sLO https://github.com/Intel-Media-SDK/MediaSDK/releases/download/intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}/MediaStack.tar.gz && \
         tar -xz --strip-components=1 -f MediaStack.tar.gz && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON  . && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON . && \
         make && \
         make install && \
         rm -rf ${DIR}
