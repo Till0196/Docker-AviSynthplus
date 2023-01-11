@@ -552,9 +552,8 @@ RUN \
         apt-get install -y libdrm2 libxext6 libxfixes3 && \
         DIR=/tmp/mediasdk && \
         mkdir -p ${DIR} && \
-        cd ${DIR} && \        
-        curl -sLO https://github.com/Intel-Media-SDK/MediaSDK/releases/download/intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}/MediaStack.tar.gz && \
-        tar -xz --strip-components=1 -f MediaStack.tar.gz && \
+        cd ${DIR} && \
+        git clone https://github.com/Intel-Media-SDK/MediaSDK -b intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON .. && \
         make && \
