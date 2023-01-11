@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: downcase username
-      - run: |
+        run: |
           echo "ACTOR=${GITHUB_ACTOR,,}" >>${GITHUB_ENV}
 
       - name: Login to GitHub Container Registry
