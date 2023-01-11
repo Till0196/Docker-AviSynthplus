@@ -26,7 +26,7 @@ jobs:
         with:
           string: ${{ github.ACTOR }}
       - run: |
-          echo "github.ACTOR="${{ steps.string.outputs.lowercase }}" >>${GITHUB_ENV}
+          echo "github.ACTOR=${{ steps.string.outputs.lowercase }}" >>${GITHUB_ENV}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
