@@ -517,7 +517,7 @@ RUN \
         git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
         ./autogen.sh && \
         make && \
-        make install
+        make install && \
         rm -rf ${DIR}
 
 ## gmmlib
