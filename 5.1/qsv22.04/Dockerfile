@@ -544,7 +544,7 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
-## libmfx {LIBMFX_VERSION}
+## libmfx
 RUN \
         DIR=/tmp/libmfx && \
         mkdir -p ${DIR} && \
