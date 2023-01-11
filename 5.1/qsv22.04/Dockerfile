@@ -50,7 +50,7 @@ ENV         FFMPEG_VERSION=5.1 \
             GMMLIB_VERSION=22.3.3 \
             LIBMFX_VERSION=1.35.1 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
-            INTEL_MEDIA_SDK_VERSION=21.3.5 \
+            INTEL_MEDIA_SDK_VERSION=22.6.5 \
             SRC=/usr/local
 
 ARG         FREETYPE_SHA256SUM="5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac freetype-2.10.4.tar.gz"
@@ -553,7 +553,8 @@ RUN \
         DIR=/tmp/mediasdk && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        git clone https://github.com/Intel-Media-SDK/MediaSDK -b intel-mediasdk-${INTEL_MEDIA_SDK_VERSION} --depth 1 && \
+        curl -sLO https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON .. && \
         make && \
@@ -696,7 +697,7 @@ RUN \
         done
 
 FROM        base AS release
-MAINTAINER  Tobitti <mail@tobitti.net>
+MAINTAINER  Till0196
 
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
 
