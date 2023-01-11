@@ -508,6 +508,7 @@ RUN \
 
 ## libva
 RUN \
+        apt-get install -y libdrm-dev && \
         DIR=/tmp/libva && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
@@ -518,6 +519,7 @@ RUN \
 
 ## gmmlib
 RUN \
+        apt-get install -y libpciaccess-dev && \
         DIR=/tmp/gmmlib && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
