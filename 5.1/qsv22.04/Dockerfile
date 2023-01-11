@@ -540,7 +540,7 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \        
         curl -sLO https://github.com/intel/media-driver/archive/intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
-        tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz --depth 1 && \
+        tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
         make && \
@@ -553,7 +553,7 @@ RUN \
         DIR=/tmp/mediasdk && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        git clone https://github.com/Intel-Media-SDK/MediaSDK -b intel-mediasdk-${INTEL_MEDIA_SDK_VERSION} && \
+        git clone https://github.com/Intel-Media-SDK/MediaSDK -b intel-mediasdk-${INTEL_MEDIA_SDK_VERSION} --depth 1 && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON .. && \
         make && \
