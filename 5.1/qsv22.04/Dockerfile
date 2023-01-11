@@ -511,7 +511,7 @@ RUN \
         DIR=/tmp/libva && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        git clone https://github.com/intel/libva ${DIR} -b v${LIBVA_VERSION} --depth 1 && \
+        git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
         ./autogen.sh && \
         make && \
         make install
