@@ -28,11 +28,14 @@ jobs:
           username: ${{ github.ACTOR }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: set lower case owner name
-        run: |
-          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            sha_${{ github.sha }}
+            latest
 
       - name: Build and push
         uses: docker/build-push-action@v3
