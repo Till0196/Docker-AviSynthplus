@@ -569,7 +569,7 @@ RUN \
         curl -sLO https://github.com/Intel-Media-SDK/MediaSDK/archive/intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         mkdir build && cd build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON .. && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
         make install && \
         rm -rf ${DIR}
