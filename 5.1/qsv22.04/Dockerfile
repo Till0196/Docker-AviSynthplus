@@ -562,7 +562,7 @@ RUN \
 
 ## MediaSDK
 RUN \ 
-        apt-get install -y libdrm2 libxext6 libxfixes3 && \
+        apt-get install -y libdrm2 libxext6 libxfixes3 libx11-xcb-dev libxcb-dri3-dev libxcb-present-dev && \
         DIR=/tmp/mediasdk && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
