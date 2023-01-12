@@ -534,6 +534,19 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
+## libmfx
+RUN \
+        DIR=/tmp/libmfx && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://github.com/lu-zero/mfx_dispatch/archive/${LIBMFX_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f ${LIBMFX_VERSION}.tar.gz && \
+        autoreconf -fiv && \
+        ./configure --prefix="${PREFIX}" && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
 ## MediaDriver
 RUN \ 
         DIR=/tmp/mediadriver && \
@@ -557,19 +570,6 @@ RUN \
         tar -xz --strip-components=1 -f intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_WAYLAND=ON -DENABLE_X11_DRI3=ON -DENABLE_OPENCL=ON .. && \
-        make && \
-        make install && \
-        rm -rf ${DIR}
-
-## libmfx
-RUN \
-        DIR=/tmp/libmfx && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sLO https://github.com/lu-zero/mfx_dispatch/archive/${LIBMFX_VERSION}.tar.gz && \
-        tar -xz --strip-components=1 -f ${LIBMFX_VERSION}.tar.gz && \
-        autoreconf -fiv && \
-        ./configure --prefix="${PREFIX}" && \
         make && \
         make install && \
         rm -rf ${DIR}
