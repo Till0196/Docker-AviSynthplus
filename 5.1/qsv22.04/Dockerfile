@@ -48,7 +48,6 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBVMAF_VERSION=2.1.1 \
             LIBVA_VERSION=2.16.0 \
             GMMLIB_VERSION=22.3.3 \
-            LIBMFX_VERSION=1.35.1 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
             SRC=/usr/local
@@ -69,9 +68,9 @@ ARG         LIBARIBB24_SHA256SUM="f61560738926e57f9173510389634d8c06cabedfa857db
 
 ARG         LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG         MAKEFLAGS="-j2"
-ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig"
+ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig:/opt/intel/mediasdk/lib/pkgconfig"
 ARG         PREFIX=/opt/ffmpeg
-ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64"
+ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:"
 
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -515,9 +514,11 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
-        ./autogen.sh && \
+        ./autogen.sh --prefix="${PREFIX}" && \
         make && \
         make install && \
+        echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf && \
+        ldconfig && \
         rm -rf ${DIR}
 
 ## gmmlib
@@ -534,18 +535,14 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
-## libmfx
+## export environment variables
 RUN \
-        DIR=/tmp/libmfx && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sLO https://github.com/lu-zero/mfx_dispatch/archive/${LIBMFX_VERSION}.tar.gz && \
-        tar -xz --strip-components=1 -f ${LIBMFX_VERSION}.tar.gz && \
-        autoreconf -fiv && \
-        ./configure --prefix="${PREFIX}" && \
-        make && \
-        make install && \
-        rm -rf ${DIR}
+        if [[ -z "${LIBVA_DRIVERS_PATH}" ]]; then \
+          echo 'LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri' >> /etc/environment \
+        fi \
+        if [[ -z "${LIBVA_DRIVER_NAME}" ]]; then \
+          echo 'LIBVA_DRIVER_NAME=iHD' >> /etc/environment \
+        fi
 
 ## MediaDriver
 RUN \ 
@@ -562,7 +559,6 @@ RUN \
 
 ## MediaSDK
 RUN \ 
-        apt-get install -y libdrm2 libxext6 libxfixes3 libx11-xcb-dev libxcb-dri3-dev libxcb-present-dev && \
         DIR=/tmp/mediasdk && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
@@ -572,6 +568,8 @@ RUN \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
         make install && \
+        echo /opt/intel/mediasdk/lib/ >> /etc/ld.so.conf.d/mediasdk.conf && \
+        ldconfig && \
         rm -rf ${DIR}
 
 #AviSynth+
