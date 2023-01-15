@@ -546,6 +546,8 @@ RUN \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
         make && \
         make install && \
+        mkdir -p ${PREFIX}/lib/dri && \
+        cp ../iHD_drv_video.so ${PREFIX}/lib/dri && \
         rm -rf ${DIR}
 
 ## MediaSDK
