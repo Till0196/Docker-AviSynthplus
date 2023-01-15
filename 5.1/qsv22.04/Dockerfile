@@ -538,10 +538,10 @@ RUN \
 ## export environment variables
 RUN \
         if [[ -z "${LIBVA_DRIVERS_PATH}" ]]; then \
-          echo 'LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri' >> /etc/environment \
+          echo 'LIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri' >> /etc/environment; \
         fi \
         if [[ -z "${LIBVA_DRIVER_NAME}" ]]; then \
-          echo 'LIBVA_DRIVER_NAME=iHD' >> /etc/environment \
+          echo 'LIBVA_DRIVER_NAME=iHD' >> /etc/environment; \
         fi
 
 ## MediaDriver
