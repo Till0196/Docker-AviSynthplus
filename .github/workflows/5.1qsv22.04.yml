@@ -32,7 +32,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/${{ env.IMAGE_NAME }}
+          images: ghcr.io/${{ github.repository }}
           tags: ${{ env.TAG_NAME }}
 
       - name: Build and push
