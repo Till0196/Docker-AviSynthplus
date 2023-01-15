@@ -33,9 +33,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ghcr.io/${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ env.TAG_NAME }}
-            latest
+          tags: ${{ env.TAG_NAME }}
 
       - name: Build and push
         uses: docker/build-push-action@v3
