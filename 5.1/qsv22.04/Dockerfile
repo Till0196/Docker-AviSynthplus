@@ -517,8 +517,8 @@ RUN \
         cd ${DIR} && \
         git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
         ./autogen.sh --prefix="${PREFIX}" && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf && \
         ldconfig && \
         rm -rf ${DIR}
@@ -533,8 +533,8 @@ RUN \
         tar -xz --strip-components=1 -f intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DARCH=64 .. && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         rm -rf ${DIR}
 
 ## MediaDriver
@@ -546,8 +546,8 @@ RUN \
         tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         rm -rf ${DIR}
 
 ## MediaSDK
@@ -559,8 +559,8 @@ RUN \
         tar -xz --strip-components=1 -f intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         echo /opt/intel/mediasdk/lib/ >> /etc/ld.so.conf.d/mediasdk.conf && \
         ldconfig && \
         rm -rf ${DIR}
@@ -573,8 +573,8 @@ RUN \
         curl -sLO https://github.com/intel/intel-vaapi-driver/releases/download/${INTEL_VA-API_DRIVER_VERSION}/intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
         tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
         ./autogen.sh --prefix="${PREFIX}" && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         rm -rf ${DIR}
 
 RUN \ 
@@ -584,8 +584,8 @@ RUN \
         curl -sLO https://github.com/intel/libva-utils/releases/download/${INTEL_LIBVA_UTILS_VERSION}/libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
         tar -jx --strip-components=1 -f libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
         ./autogen.sh --prefix="${PREFIX}" && \
-        make -j$(nprocs) && \
-        make install -j$(nprocs) && \
+        make && \
+        make install && \
         rm -rf ${DIR}
 
 #AviSynth+
