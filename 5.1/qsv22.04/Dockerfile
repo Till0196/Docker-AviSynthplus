@@ -571,7 +571,7 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://github.com/intel/intel-vaapi-driver/releases/download/${INTEL_VA-API_DRIVER_VERSION}/intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
-        tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
+        tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.bz2 && \
         ./autogen.sh --prefix="${PREFIX}" && \
         make && \
         make install && \
@@ -582,7 +582,7 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://github.com/intel/libva-utils/releases/download/${INTEL_LIBVA_UTILS_VERSION}/libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
-        tar -jx --strip-components=1 -f libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
+        tar -jx --strip-components=1 -f libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.bz2 && \
         ./autogen.sh --prefix="${PREFIX}" && \
         make && \
         make install && \
