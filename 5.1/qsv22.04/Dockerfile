@@ -682,7 +682,7 @@ RUN \
         cp ${PREFIX}/bin/* /usr/local/bin/ && \
         cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
         cp -r ${PREFIX}/lib/x86_64-linux-gnu /usr/local/lib/ && \
-        cp -r ${PREFIX}/mediasdk/lib /usr/local/lib/ && \
+        cp -r ${PREFIX}/mediasdk/lib/* /usr/local/lib/ && \
         LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
         cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
         mkdir -p /usr/local/lib/pkgconfig && \
