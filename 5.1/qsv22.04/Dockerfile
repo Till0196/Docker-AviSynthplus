@@ -50,6 +50,8 @@ ENV         FFMPEG_VERSION=5.1 \
             GMMLIB_VERSION=22.3.3 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
+            INTEL_VA-API_DRIVER_VERSION=2.4.1 \
+            INTEL_LIBVA_UTILS_VERSION=2.16.0 \
             SRC=/usr/local
 
 ARG         FREETYPE_SHA256SUM="5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac freetype-2.10.4.tar.gz"
@@ -70,7 +72,7 @@ ARG         LD_LIBRARY_PATH=/opt/ffmpeg/lib
 ARG         MAKEFLAGS="-j2"
 ARG         PKG_CONFIG_PATH="/opt/ffmpeg/share/pkgconfig:/opt/ffmpeg/lib/pkgconfig:/opt/ffmpeg/lib64/pkgconfig:/opt/intel/mediasdk/lib/pkgconfig"
 ARG         PREFIX=/opt/ffmpeg
-ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:"
+ARG         LD_LIBRARY_PATH="/opt/ffmpeg/lib:/opt/ffmpeg/lib64:/opt/ffmpeg/lib/x86_64-linux-gnu/:/opt/ffmpeg/mediasdk/lib"
 
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -515,8 +517,8 @@ RUN \
         cd ${DIR} && \
         git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
         ./autogen.sh --prefix="${PREFIX}" && \
-        make && \
-        make install && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
         echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf && \
         ldconfig && \
         rm -rf ${DIR}
@@ -531,8 +533,8 @@ RUN \
         tar -xz --strip-components=1 -f intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DARCH=64 .. && \
-        make && \
-        make install && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
         rm -rf ${DIR}
 
 ## MediaDriver
@@ -544,8 +546,8 @@ RUN \
         tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
-        make && \
-        make install && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
         rm -rf ${DIR}
 
 ## MediaSDK
@@ -557,10 +559,33 @@ RUN \
         tar -xz --strip-components=1 -f intel-mediasdk-${INTEL_MEDIA_SDK_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
-        make && \
-        make install && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
         echo /opt/intel/mediasdk/lib/ >> /etc/ld.so.conf.d/mediasdk.conf && \
         ldconfig && \
+        rm -rf ${DIR}
+
+## Intel VA-API driver
+RUN \ 
+        DIR=/tmp/vaapi && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://github.com/intel/intel-vaapi-driver/releases/download/${INTEL_VA-API_DRIVER_VERSION}/intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
+        tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
+        ./autogen.sh --prefix="${PREFIX}" && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
+        rm -rf ${DIR}
+
+RUN \ 
+        DIR=/tmp/libva-utils && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://github.com/intel/libva-utils/releases/download/${INTEL_LIBVA_UTILS_VERSION}/libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
+        tar -jx --strip-components=1 -f libva-utils-${INTEL_LIBVA_UTILS_VERSION}.tar.gz2 && \
+        ./autogen.sh --prefix="${PREFIX}" && \
+        make -j$(nprocs) && \
+        make install -j$(nprocs) && \
         rm -rf ${DIR}
 
 #AviSynth+
@@ -683,6 +708,8 @@ RUN \
         mkdir -p /usr/local/lib/pkgconfig && \
         for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
           sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+        cp -r ${PREFIX}/lib/x86_64-linux-gnu /usr/local/lib/ && \
+        cp -r ${PREFIX}/mediasdk/lib /usr/local/lib/ \
         done
 
 FROM        base AS release
