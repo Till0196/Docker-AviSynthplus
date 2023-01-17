@@ -50,7 +50,7 @@ ENV         FFMPEG_VERSION=5.1 \
             GMMLIB_VERSION=22.3.3 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
-            INTEL_VA-API_DRIVER_VERSION=2.4.1 \
+            INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
             INTEL_LIBVA_UTILS_VERSION=2.16.0 \
             SRC=/usr/local
 
@@ -570,8 +570,8 @@ RUN \
         DIR=/tmp/vaapi && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://github.com/intel/intel-vaapi-driver/releases/download/${INTEL_VA-API_DRIVER_VERSION}/intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.gz2 && \
-        tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VA-API_DRIVER_VERSION}.tar.bz2 && \
+        curl -sLO https://github.com/intel/intel-vaapi-driver/releases/download/${INTEL_VAAPI_DRIVER_VERSION}/intel-vaapi-driver-${INTEL_VAAPI_DRIVER_VERSION}.tar.gz2 && \
+        tar -jx --strip-components=1 -f intel-vaapi-driver-${INTEL_VAAPI_DRIVER_VERSION}.tar.bz2 && \
         ./autogen.sh --prefix="${PREFIX}" && \
         make && \
         make install && \
