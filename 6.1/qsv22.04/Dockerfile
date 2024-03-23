@@ -10,7 +10,7 @@ RUN     apt-get -yqq update && \
 FROM base as build
 
 ENV         FFMPEG_VERSION=6.1.1 \
-            AVISYNTHPLUS_VERSION=v3.7.2 \
+            AVISYNTHPLUS_VERSION=v3.7.3 \
             LSMASHSOURCE_VERSION=20220505 \
             AOM_VERSION=v3.8.1 \
             CHROMAPRINT_VERSION=1.5.0 \
