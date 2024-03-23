@@ -47,6 +47,7 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBPNG_VERSION=1.6.9 \
             LIBVMAF_VERSION=2.1.1 \
             LIBVA_VERSION=2.16.0 \
+            LIBPCIACCESS_VERSION=0.18 \
             LIBDRM_VERSION=2.4.120 \
             GMMLIB_VERSION=22.3.3 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
@@ -512,6 +513,18 @@ RUN \
         make install && \
         echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf && \
         ldconfig && \
+        rm -rf ${DIR}
+
+## libpciaccess
+RUN \
+        DIR=/tmp/libpciaccess && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://gitlab.freedesktop.org/xorg/lib/libpciaccess/-/archive/libpciaccess-${LIBPCIACCESS_VERSION}/libpciaccess-libpciaccess-${LIBPCIACCESS_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f libpciaccess-libpciaccess-${LIBPCIACCESS_VERSION}.tar.gz && \
+        meson build --buildtype=release --prefix="${PREFIX}" -Ddefault_library=shared -Dzlib=enabled && \
+        ninja -vC build && \
+        ninja -vC build install && \
         rm -rf ${DIR}
 
 ## libdrm
