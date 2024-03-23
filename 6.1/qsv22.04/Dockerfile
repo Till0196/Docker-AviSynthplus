@@ -684,7 +684,6 @@ RUN  \
         --disable-debug \
         --disable-doc \
         --disable-ffplay \
-        --enable-libmfx \
         --enable-libvpl \
         --enable-vaapi \
         --enable-avisynth \
