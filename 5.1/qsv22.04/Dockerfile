@@ -47,6 +47,7 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBPNG_VERSION=1.6.9 \
             LIBVMAF_VERSION=2.1.1 \
             LIBVA_VERSION=2.16.0 \
+            LIBDRM_VERSION=2.4.120 \
             GMMLIB_VERSION=22.3.3 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
@@ -515,7 +516,8 @@ RUN \
         DIR=/tmp/libva && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
+        curl -sLO https://github.com/intel/libva/archive/${LIBVA_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f ${LIBVA_VERSION}.tar.gz && \
         ./autogen.sh --prefix="${PREFIX}" --enable-shared --disable-static --with-pic --disable-docs --enable-drm \
                 --disable-x11 --disable-glx --disable-wayland && \
         make && \
@@ -524,6 +526,20 @@ RUN \
         ldconfig && \
         rm -rf ${DIR}
 
+## libdrm
+RUN \
+        DIR=/tmp/libdrm && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://gitlab.freedesktop.org/mesa/libdrm/archive/libdrm-${LIBDRM_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f libdrm-${LIBDRM_VERSION}.tar.gz && \
+        meson --buildtype=release --prefix="${PREFIX}" --bindir=bin --libdir=lib -Ddefault_library=shared -Dudev=false -Dcairo-tests=disabled \
+              -Dvalgrind=disabled -Dexynos=disabled -Dfreedreno=disabled -Domap=disabled -Detnaviv=disabled -Dintel=enabled -Dnouveau=enabled \
+              -Dradeon=enabled -Damdgpu=enabled && \
+        ninja && \
+        ninja install && \
+        rm -rf ${DIR}
+        
 ## gmmlib
 RUN \
         apt-get install -y libpciaccess-dev && \
@@ -551,7 +567,7 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
-## Build intel-vaapi-driver
+## VaapiDriver
 RUN \ 
         DIR=/tmp/intel-vaapi-driver && \
         mkdir -p ${DIR} && \
@@ -564,6 +580,19 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
+## libva-utils
+RUN \ 
+        DIR=/tmp/libva-utils && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/intel/libva-utils/archive/${INTEL_LIBVA_UTILS_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f ${INTEL_LIBVA_UTILS_VERSION}.tar.gz && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+        
 ## MediaSDK
 RUN \ 
         DIR=/tmp/mediasdk && \
@@ -620,6 +649,7 @@ RUN  \
         --enable-libaribb24 \
         --enable-libass \
         --enable-libbluray \
+        --enable-libdrm \
         --enable-libfdk_aac \
         --enable-libfreetype \
         --enable-libkvazaar \
@@ -714,3 +744,7 @@ ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
 
+RUN \
+	apt-get update -y && \
+	apt-get install -y --no-install-recommends libva-drm2 libva2 i965-va-driver && \
+	rm -rf /var/lib/apt/lists/*
