@@ -53,6 +53,8 @@ ENV         FFMPEG_VERSION=5.1 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
             INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
+            ONEVPL_INTEL_GPU_VERSION=24.1.5 \
+            LIBVPL_VERSION=2.10.2 \
             INTEL_LIBVA_UTILS_VERSION=2.16.0 \
             SRC=/usr/local
 
@@ -581,6 +583,34 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
+## oneVPL runtime
+RUN \ 
+        DIR=/tmp/oneVPL && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/oneapi-src/oneVPL-intel-gpu/archive/intel-onevpl-${ONEVPL_INTEL_GPU_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f intel-onevpl-${ONEVPL_INTEL_GPU_VERSION}.tar.gz && \
+        mkdir build && cd build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_RUNTIME=1 -DBUILD_TESTS=0 .. && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
+## libvpl
+RUN \ 
+        DIR=/tmp/libvpl && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/intel/libvpl/archive/v${LIBVPL_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f v${LIBVPL_VERSION}.tar.gz && \
+        mkdir build && cd build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_DISPATCHER=1 -DBUILD_DEV=1 -DBUILD_PREVIEW=0 -DBUILD_TOOLS=0 \
+          -DBUILD_TOOLS_ONEVPL_EXPERIMENTAL=0 -DINSTALL_EXAMPLE_CODE=0 -DBUILD_SHARED_LIBS=0 -DBUILD_TESTS=0 .. && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
+
 ## libva-utils
 RUN \ 
         DIR=/tmp/libva-utils && \
@@ -642,6 +672,7 @@ RUN  \
         --disable-doc \
         --disable-ffplay \
         --enable-libmfx \
+        --enable-libvpl \
         --enable-vaapi \
         --enable-avisynth \
         --enable-fontconfig \
