@@ -757,11 +757,16 @@ RUN \
         cp ${PREFIX}/bin/* /usr/local/bin/ && \
         cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
         cp -r ${PREFIX}/lib/* /usr/local/lib/ && \
-        LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
+        cp -r ${PREFIX}/lib64/* /usr/local/lib64/ && \
+        LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64 ffmpeg -buildconf && \
         cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
         mkdir -p /usr/local/lib/pkgconfig && \
+        mkdir -p /usr/local/lib64/pkgconfig && \
         for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
           sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+        done && \
+        for pc in ${PREFIX}/lib64/pkgconfig/libvmaf*.pc ${PREFIX}/lib64/pkgconfig/pciaccess*.pc; do \
+          sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib64/pkgconfig/"${pc##*/}"; \
         done
 
 FROM        base AS release
