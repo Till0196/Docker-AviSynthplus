@@ -505,7 +505,7 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://github.com/intel/libva/archive/${LIBVA_VERSION}.tar.gz && \
-        tar -zx --strip-components=1 -f ${LIBVA_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f ${LIBVA_VERSION}.tar.gz && \
         ./autogen.sh --prefix="${PREFIX}" --enable-shared --disable-static --with-pic --disable-docs --enable-drm \
                 --disable-x11 --disable-glx --disable-wayland && \
         make && \
@@ -520,12 +520,12 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${LIBDRM_VERSION}/libdrm-${LIBDRM_VERSION}.tar.gz && \
-        tar -zx --strip-components=1 -f libdrm-${LIBDRM_VERSION}.tar.gz && \
-        meson --buildtype=release --prefix="${PREFIX}" --bindir=bin --libdir=lib -Ddefault_library=shared -Dudev=false -Dcairo-tests=disabled \
+        tar -xz --strip-components=1 -f libdrm-${LIBDRM_VERSION}.tar.gz && \
+        meson build --buildtype=release --prefix="${PREFIX}" --bindir=bin --libdir=lib -Ddefault_library=shared -Dudev=false -Dcairo-tests=disabled \
               -Dvalgrind=disabled -Dexynos=disabled -Dfreedreno=disabled -Domap=disabled -Detnaviv=disabled -Dintel=enabled -Dnouveau=enabled \
               -Dradeon=enabled -Damdgpu=enabled && \
-        ninja && \
-        ninja install && \
+        ninja -vC build && \
+        ninja -vC build install && \
         rm -rf ${DIR}
         
 ## gmmlib
