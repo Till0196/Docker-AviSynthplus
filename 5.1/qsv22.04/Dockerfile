@@ -744,7 +744,3 @@ ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
 
-RUN \
-	apt-get update -y && \
-	apt-get install -y --no-install-recommends libva-drm2 libva2 i965-va-driver && \
-	rm -rf /var/lib/apt/lists/*
