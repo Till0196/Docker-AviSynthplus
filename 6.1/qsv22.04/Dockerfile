@@ -9,10 +9,10 @@ RUN     apt-get -yqq update && \
 
 FROM base as build
 
-ENV         FFMPEG_VERSION=5.1 \
+ENV         FFMPEG_VERSION=6.1.1 \
             AVISYNTHPLUS_VERSION=v3.7.2 \
             LSMASHSOURCE_VERSION=20220505 \
-            AOM_VERSION=v1.0.0 \
+            AOM_VERSION=v3.8.1 \
             CHROMAPRINT_VERSION=1.5.0 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.12.4 \
@@ -49,6 +49,7 @@ ENV         FFMPEG_VERSION=5.1 \
             LIBVA_VERSION=2.16.0 \
             LIBPCIACCESS_VERSION=0.18 \
             LIBDRM_VERSION=2.4.120 \
+            ZIMG_VERSION=3.0.5 \
             GMMLIB_VERSION=22.3.3 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
@@ -582,6 +583,33 @@ RUN \
         make install && \
         rm -rf ${DIR}
 
+## oneVPL runtime
+RUN \ 
+        DIR=/tmp/oneVPL && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/oneapi-src/oneVPL-intel-gpu/archive/intel-onevpl-${ONEVPL_INTEL_GPU_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f intel-onevpl-${ONEVPL_INTEL_GPU_VERSION}.tar.gz && \
+        mkdir build && cd build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_RUNTIME=1 -DBUILD_TESTS=0 .. && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
+## libvpl
+RUN \ 
+        DIR=/tmp/libvpl && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/intel/libvpl/archive/v${LIBVPL_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f v${LIBVPL_VERSION}.tar.gz && \
+        mkdir build && cd build && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_DISPATCHER=1 -DBUILD_DEV=1 -DBUILD_PREVIEW=0 -DBUILD_TOOLS=0 \
+          -DBUILD_TOOLS_ONEVPL_EXPERIMENTAL=0 -DINSTALL_EXAMPLE_CODE=0 -DBUILD_SHARED_LIBS=0 -DBUILD_TESTS=0 .. && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
 
 ## libva-utils
 RUN \ 
@@ -628,6 +656,19 @@ RUN     set -xe && \
         ldconfig && \
         rm -rf ${DIR}
 
+# zimg  https://github.com/sekrit-twc/zimg
+RUN \
+        DIR=/tmp/zimg && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sL https://github.com/sekrit-twc/zimg/archive/refs/tags/release-${ZIMG_VERSION}.tar.gz | \
+        tar -zx --strip-components=1 && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" --enable-shared  && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
 ## Download ffmpeg https://ffmpeg.org/
 RUN  \
         DIR=/tmp/ffmpeg && mkdir -p ${DIR} && cd ${DIR} && \
@@ -644,6 +685,7 @@ RUN  \
         --disable-doc \
         --disable-ffplay \
         --enable-libmfx \
+        --enable-libvpl \
         --enable-vaapi \
         --enable-avisynth \
         --enable-fontconfig \
@@ -671,6 +713,7 @@ RUN  \
         --enable-libx265 \
         --enable-libxcb \
         --enable-libxvid \
+        --enable-libzimg \
         --enable-libzmq \
         --enable-nonfree \
         --enable-openssl \
