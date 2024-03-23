@@ -253,18 +253,6 @@ RUN \
         make && \
         make install && \
         rm -rf ${DIR}
-### fdk-aac https://github.com/mstorsjo/fdk-aac
-RUN \
-        DIR=/tmp/fdk-aac && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sL https://github.com/mstorsjo/fdk-aac/archive/v${FDKAAC_VERSION}.tar.gz | \
-        tar -zx --strip-components=1 && \
-        autoreconf -fiv && \
-        ./configure --prefix="${PREFIX}" --enable-shared --datadir="${DIR}" && \
-        make && \
-        make install && \
-        rm -rf ${DIR}
 ## openjpeg https://github.com/uclouvain/openjpeg
 RUN \
         DIR=/tmp/openjpeg && \
@@ -531,7 +519,7 @@ RUN \
         DIR=/tmp/libdrm && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://gitlab.freedesktop.org/mesa/libdrm/archive/libdrm-${LIBDRM_VERSION}.tar.gz && \
+        curl -sLO https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${LIBDRM_VERSION}/libdrm-${LIBDRM_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f libdrm-${LIBDRM_VERSION}.tar.gz && \
         meson --buildtype=release --prefix="${PREFIX}" --bindir=bin --libdir=lib -Ddefault_library=shared -Dudev=false -Dcairo-tests=disabled \
               -Dvalgrind=disabled -Dexynos=disabled -Dfreedreno=disabled -Domap=disabled -Detnaviv=disabled -Dintel=enabled -Dnouveau=enabled \
@@ -650,7 +638,6 @@ RUN  \
         --enable-libass \
         --enable-libbluray \
         --enable-libdrm \
-        --enable-libfdk_aac \
         --enable-libfreetype \
         --enable-libkvazaar \
         --enable-libmp3lame \
