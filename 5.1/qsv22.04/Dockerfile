@@ -516,7 +516,8 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         git clone https://github.com/intel/libva ${DIR} -b ${LIBVA_VERSION} --depth 1 && \
-        ./autogen.sh --prefix="${PREFIX}" && \
+        ./autogen.sh --prefix="${PREFIX}" --enable-shared --disable-static --with-pic --disable-docs --enable-drm \
+                --disable-x11 --disable-glx --disable-wayland && \
         make && \
         make install && \
         echo /usr/local/lib >> /etc/ld.so.conf.d/local.conf && \
@@ -546,6 +547,19 @@ RUN \
         tar -xz --strip-components=1 -f intel-media-${INTEL_MEDIA_DRIVER_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DENABLE_PRODUCTION_KMD=OFF .. && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
+## Build intel-vaapi-driver
+RUN \ 
+        DIR=/tmp/intel-vaapi-driver && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \        
+        curl -sLO https://github.com/intel/intel-vaapi-driver/archive/${INTEL_VAAPI_DRIVER_VERSION}.tar.gz && \
+        tar -xz --strip-components=1 -f ${INTEL_VAAPI_DRIVER_VERSION}.tar.gz && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -690,9 +704,10 @@ RUN \
         done
 
 FROM        base AS release
-MAINTAINER  Till0196
+LABEL       maintainer="Till0196"
 
-ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
+ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64 \
+            LIBVA_DRIVERS_PATH=/usr/local/lib/dri
 
 CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
