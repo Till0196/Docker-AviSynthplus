@@ -649,8 +649,11 @@ RUN \
         DIR=/tmp/intel-opencl-icd && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
+        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-core_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
+        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-media_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
+        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
         curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl-devel_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        dpkg -i ./intel-igc-opencl-devel_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
+        dpkg -i ./intel-igc*.deb && \
         curl -sLO https://github.com/intel/compute-runtime/archive/${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f ${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         mkdir build && cd build && \
@@ -823,9 +826,9 @@ RUN \
         cp -r ${PREFIX}/lib/* /usr/local/lib/ && \
         LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
         cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
-        mkdir -p /usr/local/lib/pkgconfig && \
-        for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
-          sed "s:${PREFIX}:/usr/local:g; s:/lib64:/lib:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+        find /usr/local/lib/ -path "*/pkgconfig/*.pc" | while read PCFILE; do \
+          echo "Updating ${PREFIX} to /usr/local in $PCFILE" && \
+          sed -i "s|^prefix=${PREFIX}$|prefix=/usr/local|" $PCFILE; \
         done
 
 FROM        base AS release
