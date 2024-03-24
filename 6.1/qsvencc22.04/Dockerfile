@@ -51,6 +51,9 @@ ENV         FFMPEG_VERSION=6.1.1 \
             LIBDRM_VERSION=2.4.120 \
             ZIMG_VERSION=3.0.5 \
             GMMLIB_VERSION=22.3.3 \
+            OPENCL_CLANG=140 \
+            LLVM_VERSION=14.0.5 \
+            SPIRV_LLVM_TRANSLATOR_VERSION=140 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
             INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
@@ -105,8 +108,7 @@ RUN      buildDeps="autoconf \
                     ninja-build \
                     libssl-dev \
                     yasm \
-                    zlib1g-dev \
-                    opencl-headers" && \
+                    zlib1g-dev" && \
         apt-get -yqq update && \
         apt-get install -yq --no-install-recommends ${buildDeps}
 
@@ -644,16 +646,38 @@ RUN \
         ldconfig && \
         rm -rf ${DIR}
 
+## intel-graphics-compiler
+RUN \
+        apt-get install -y flex bison libz-dev cmake libc6 libstdc++6 patch && \
+        DIR=/tmp/intel-graphics-compiler && \
+        mkdir -p ${DIR}/igc && \
+        mkdir -p ${DIR}/vc-intrinsics && \
+        mkdir -p ${DIR}/SPIRV-Tools && \
+        mkdir -p ${DIR}/SPIRV-Headers && \
+        mkdir -p ${DIR}/llvm-project && \
+        git clone --branch master https://github.com/intel/vc-intrinsics.git ${DIR}/vc-intrinsics && \
+        git clone --branch main https://github.com/KhronosGroup/SPIRV-Tools.git ${DIR}/SPIRV-Tools && \
+        git clone --branch main https://github.com/KhronosGroup/SPIRV-Headers.git ${DIR}/SPIRV-Headers && \
+        git clone --branch llvmorg-${LLVM_VERSION} https://github.com/llvm/llvm-project.git ${DIR}/llvm-project && \
+        git clone --branch ocl-open-${OPENCL_CLANG} https://github.com/intel/opencl-clang.git ${DIR}/llvm-project/llvm/projects/opencl-clang && \
+        git clone --branch llvm_release_${SPIRV_LLVM_TRANSLATOR_VERSION} https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git ${DIR}/llvm-project/llvm/projects/llvm-spirv && \
+        git clone --branch igc-${INTEL_GRAPHICS_COMPILER_VERSION} https://github.com/intel/intel-graphics-compiler.git ${DIR}/igc && \
+        cd ${DIR} && \
+        mkdir build && \
+        cd build && \
+        git config --global user.email "you@example.com" && \
+        git config --global user.name "Your Name" && \
+        cmake ../igc -DIGC_OPTION__LLVM_MODE=Source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" && \
+        make && \
+        make install && \
+        ldconfig && \
+        rm -rf ${DIR}
+
 ## intel-opencl-icd
 RUN \ 
         DIR=/tmp/intel-opencl-icd && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-core_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-media_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl-devel_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        dpkg -i ./intel-igc*.deb && \
         curl -sLO https://github.com/intel/compute-runtime/archive/${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f ${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         mkdir build && cd build && \
@@ -807,6 +831,7 @@ RUN     set -xe && \
 
 ## QSVEncC
 RUN \
+        apt-get install -y opencl-headers && \
         DIR=/tmp/qsvencc && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
