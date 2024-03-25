@@ -273,6 +273,7 @@ RUN \
         rm -rf ${DIR}
 ## freetype https://www.freetype.org/
 RUN  \
+        apt-get install -y libbz2-dev libpng-dev && \
         DIR=/tmp/freetype && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
