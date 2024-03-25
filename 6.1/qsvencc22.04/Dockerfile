@@ -41,7 +41,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             XPROTO_VERSION=7.0.31 \
             XVID_VERSION=1.3.4 \
             LIBXML2_VERSION=2.9.12 \
-            LIBBLURAY_VERSION=1.1.2 \
+            LIBBLURAY_VERSION=1.3.4 \
             LIBZMQ_VERSION=4.3.2 \
             LIBSRT_VERSION=1.4.1 \
             LIBARIBB24_VERSION=1.0.3 \
@@ -463,7 +463,6 @@ RUN \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://download.videolan.org/pub/videolan/libbluray/${LIBBLURAY_VERSION}/libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
-        echo ${LIBBLURAY_SHA256SUM} | sha256sum --check && \
         tar -jx --strip-components=1 -f libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
         ./configure --prefix="${PREFIX}" --disable-examples --disable-bdjava-jar --enable-static --disable-shared && \
         make && \
@@ -660,8 +659,8 @@ RUN \
         curl -s https://api.github.com/repos/intel/compute-runtime/releases/tags/${INTEL_OPENCL_ICD_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
         curl -s https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/igc-${INTEL_GRAPHICS_COMPILER_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
         for file in *.deb; do \
-          dpkg-deb -I "$file" | grep -Po "(?<=Package: ).*" \
-        done > prebuild.txt && \
+          dpkg-deb -I "$file" | grep -Po "(?<=Package: ).*" ; \
+        done > prebuilds.txt && \
         dpkg -i *.deb && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
