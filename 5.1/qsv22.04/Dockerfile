@@ -15,7 +15,7 @@ ENV         FFMPEG_VERSION=5.1 \
             AOM_VERSION=v1.0.0 \
             CHROMAPRINT_VERSION=1.5.0 \
             FDKAAC_VERSION=0.1.5 \
-            FONTCONFIG_VERSION=2.12.4 \
+            FONTCONFIG_VERSION=2.15.0 \
             LIBBZIP2_VERSION=1.0.8 \
             FREETYPE_VERSION=2-13-2 \
             FRIBIDI_VERSION=1.0.13 \
@@ -327,8 +327,8 @@ RUN  \
         DIR=/tmp/fontconfig && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.bz2 && \
-        tar -jx --strip-components=1 -f fontconfig-${FONTCONFIG_VERSION}.tar.bz2 && \
+        curl -sLO https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f fontconfig-${FONTCONFIG_VERSION}.tar.gz && \
         ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
