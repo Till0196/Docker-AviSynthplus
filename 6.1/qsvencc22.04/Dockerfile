@@ -50,10 +50,10 @@ ENV         FFMPEG_VERSION=6.1.1 \
             LIBPCIACCESS_VERSION=0.18 \
             LIBDRM_VERSION=2.4.120 \
             ZIMG_VERSION=3.0.5 \
-            GMMLIB_VERSION=22.3.3 \
+            GMMLIB_VERSION=22.3.11 \
             LLVM_VERSION=14 \
-            INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
-            INTEL_MEDIA_SDK_VERSION=22.6.5 \
+            INTEL_MEDIA_DRIVER_VERSION=24.1.5 \
+            INTEL_MEDIA_SDK_VERSION=22.5.4 \
             INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
             INTEL_GRAPHICS_COMPILER_VERSION=1.0.15985.7 \
             INTEL_OPENCL_ICD_VERSION=24.09.28717.12 \
@@ -550,7 +550,6 @@ RUN \
         
 ## gmmlib
 RUN \
-        apt-get install -y libpciaccess-dev && \
         DIR=/tmp/gmmlib && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
@@ -679,7 +678,7 @@ RUN \
         make && \
         make install && \
         ldconfig && \
-        dpkg -r intel-igc-core intel-igc-opencl llvm_spirv || true && \
+        dpkg -r intel-igc-core intel-igc-opencl llvm_spirv && \
         rm -rf ${DIR}
 
 ## intel-opencl-icd
