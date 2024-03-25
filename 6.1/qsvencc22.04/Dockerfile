@@ -303,7 +303,7 @@ RUN  \
         cd ${DIR} && \
         curl -sLO https://github.com/fribidi/fribidi/archive/v${FRIBIDI_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f v${FRIBIDI_VERSION}.tar.gz && \
-        meson build --buildtype=release --prefix="${PREFIX}" --libdir=lib && \
+        meson build --buildtype=release --prefix="${PREFIX}" --libdir=lib -Ddocs=false && \
         ninja -vC build && \
         ninja -vC build install && \
         rm -rf ${DIR}
