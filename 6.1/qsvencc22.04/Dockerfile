@@ -51,9 +51,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             LIBDRM_VERSION=2.4.120 \
             ZIMG_VERSION=3.0.5 \
             GMMLIB_VERSION=22.3.3 \
-            OPENCL_CLANG=140 \
-            LLVM_VERSION=14.0.5 \
-            SPIRV_LLVM_TRANSLATOR_VERSION=140 \
+            LLVM_VERSION=14 \
             INTEL_MEDIA_DRIVER_VERSION=22.6.6 \
             INTEL_MEDIA_SDK_VERSION=22.6.5 \
             INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
@@ -648,29 +646,40 @@ RUN \
 
 ## intel-graphics-compiler
 RUN \
-        apt-get install -y flex bison libz-dev cmake libc6 libstdc++6 patch && \
+        apt-get install -y flex bison libz-dev cmake libc6 libstdc++6 patch unzip file lsb-release python3-mako \
+          llvm-${LLVM_VERSION} llvm-${LLVM_VERSION}-dev clang-${LLVM_VERSION} liblld-${LLVM_VERSION} liblld-${LLVM_VERSION}-dev && \
         DIR=/tmp/intel-graphics-compiler && \
-        mkdir -p ${DIR}/igc && \
-        mkdir -p ${DIR}/vc-intrinsics && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-core_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
+        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
+        mkdir -p ${DIR}/SPIRV-LLVM-Translator && \
         mkdir -p ${DIR}/SPIRV-Tools && \
         mkdir -p ${DIR}/SPIRV-Headers && \
-        mkdir -p ${DIR}/llvm-project && \
-        git clone --branch master https://github.com/intel/vc-intrinsics.git ${DIR}/vc-intrinsics && \
+        mkdir -p ${DIR}/vc-intrinsics && \
+        mkdir -p ${DIR}/igc && \
+        git clone --branch llvm_release_${LLVM_VERSION}0 https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git ${DIR}/SPIRV-LLVM-Translator && \
         git clone --branch main https://github.com/KhronosGroup/SPIRV-Tools.git ${DIR}/SPIRV-Tools && \
         git clone --branch main https://github.com/KhronosGroup/SPIRV-Headers.git ${DIR}/SPIRV-Headers && \
-        git clone --branch llvmorg-${LLVM_VERSION} https://github.com/llvm/llvm-project.git ${DIR}/llvm-project && \
-        git clone --branch ocl-open-${OPENCL_CLANG} https://github.com/intel/opencl-clang.git ${DIR}/llvm-project/llvm/projects/opencl-clang && \
-        git clone --branch llvm_release_${SPIRV_LLVM_TRANSLATOR_VERSION} https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git ${DIR}/llvm-project/llvm/projects/llvm-spirv && \
+        git clone --branch master https://github.com/intel/vc-intrinsics.git ${DIR}/vc-intrinsics && \
         git clone --branch igc-${INTEL_GRAPHICS_COMPILER_VERSION} https://github.com/intel/intel-graphics-compiler.git ${DIR}/igc && \
+        cd ${DIR}/SPIRV-LLVM-Translator && \
+        echo 'set(CPACK_GENERATOR "DEB")' >> CMakeLists.txt && echo 'set(CPACK_DEBIAN_PACKAGE_MAINTAINER "David Doria") # required' >> CMakeLists.txt && echo 'include(CPack)' >> CMakeLists.txt && \
+        mkdir build && cd build && \
+        cmake .. -DBASE_LLVM_VERSION="${LLVM_VERSION}.0.0" && \
+        make llvm-spirv && \
+        cpack && \
+        cp *.deb ${DIR} && \
         cd ${DIR} && \
+        dpkg -i *.deb && \
+        mv /usr/lib/libLLVMSPIRVLib.a /usr/local/lib/libLLVMSPIRVLib.a && \
         mkdir build && \
         cd build && \
-        git config --global user.email "you@example.com" && \
-        git config --global user.name "Your Name" && \
-        cmake ../igc -DIGC_OPTION__LLVM_MODE=Source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" && \
+        cmake ../igc -DIGC_OPTION__LLVM_MODE=Prebuilds -DIGC_OPTION__LLVM_PREFERRED_VERSION=${LLVM_VERSION}.0.0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" && \
         make && \
         make install && \
         ldconfig && \
+        dpkg -r intel-igc-core intel-igc-opencl llvm_spirv || true && \
         rm -rf ${DIR}
 
 ## intel-opencl-icd
