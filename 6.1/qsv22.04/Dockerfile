@@ -273,7 +273,7 @@ RUN  \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE_VERSION}/freetype-VER-${FREETYPE_VERSION}.tar.gz && \
-        tar -zx --strip-components=1 -f freetype-${FREETYPE_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f freetype-VER-${FREETYPE_VERSION}.tar.gz && \
         ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
