@@ -17,7 +17,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.12.4 \
             FREETYPE_VERSION=2-13-2 \
-            FRIBIDI_VERSION=0.19.7 \
+            FRIBIDI_VERSION=1.0.13 \
             KVAZAAR_VERSION=2.0.0 \
             LAME_VERSION=3.100 \
             LIBASS_VERSION=0.13.7 \
@@ -297,14 +297,11 @@ RUN  \
         DIR=/tmp/fribidi && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://github.com/fribidi/fribidi/archive/${FRIBIDI_VERSION}.tar.gz && \
-        echo ${FRIBIDI_SHA256SUM} | sha256sum --check && \
-        tar -zx --strip-components=1 -f ${FRIBIDI_VERSION}.tar.gz && \
-        sed -i 's/^SUBDIRS =.*/SUBDIRS=gen.tab charset lib bin/' Makefile.am && \
-        ./bootstrap --no-config --auto && \
-        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
-        make -j1 && \
-        make install && \
+        curl -sLO https://github.com/fribidi/fribidi/archive/v${FRIBIDI_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f v${FRIBIDI_VERSION}.tar.gz && \
+        meson build --buildtype=release --prefix="${PREFIX}" --libdir=lib && \
+        ninja -vC build && \
+        ninja -vC build install && \
         rm -rf ${DIR}
 ## fontconfig https://www.freedesktop.org/wiki/Software/fontconfig/
 RUN  \
