@@ -342,7 +342,7 @@ RUN  \
         echo ${LIBASS_SHA256SUM} | sha256sum --check && \
         tar -zx --strip-components=1 -f ${LIBASS_VERSION}.tar.gz && \
         ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
+        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -354,7 +354,7 @@ RUN \
         curl -sLO https://github.com/ultravideo/kvazaar/archive/v${KVAZAAR_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f v${KVAZAAR_VERSION}.tar.gz && \
         ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
+        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -460,7 +460,7 @@ RUN \
         curl -sLO https://download.videolan.org/pub/videolan/libbluray/${LIBBLURAY_VERSION}/libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
         echo ${LIBBLURAY_SHA256SUM} | sha256sum --check && \
         tar -jx --strip-components=1 -f libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
-        ./configure --prefix="${PREFIX}" --disable-examples --disable-bdjava-jar --disable-static --enable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-examples --disable-bdjava-jar --enable-static --disable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
