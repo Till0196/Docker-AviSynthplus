@@ -51,12 +51,11 @@ ENV         FFMPEG_VERSION=6.1.1 \
             LIBDRM_VERSION=2.4.120 \
             ZIMG_VERSION=3.0.5 \
             GMMLIB_VERSION=22.3.11 \
-            LLVM_VERSION=14 \
             INTEL_MEDIA_DRIVER_VERSION=24.1.5 \
             INTEL_MEDIA_SDK_VERSION=22.5.4 \
             INTEL_VAAPI_DRIVER_VERSION=2.4.1 \
             INTEL_GRAPHICS_COMPILER_VERSION=1.0.15985.7 \
-            INTEL_OPENCL_ICD_VERSION=24.09.28717.12 \
+            INTEL_OPENCL_ICD_VERSION=24.05.28454.6 \
             VAPOURSYNTH_VERSION=66 \
             ONEVPL_INTEL_GPU_VERSION=24.1.5 \
             LIBVPL_VERSION=2.10.2 \
@@ -556,7 +555,7 @@ RUN \
         curl -sLO https://github.com/intel/gmmlib/archive/intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f intel-gmmlib-${GMMLIB_VERSION}.tar.gz && \
         mkdir build && cd build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DARCH=64 .. && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -643,55 +642,22 @@ RUN \
         ldconfig && \
         rm -rf ${DIR}
 
-## intel-graphics-compiler
-RUN \
-        apt-get install -y flex bison libz-dev cmake libc6 libstdc++6 patch unzip file lsb-release python3-mako \
-          llvm-${LLVM_VERSION} llvm-${LLVM_VERSION}-dev clang-${LLVM_VERSION} liblld-${LLVM_VERSION} liblld-${LLVM_VERSION}-dev && \
-        DIR=/tmp/intel-graphics-compiler && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-core_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        curl -sLO https://github.com/intel/intel-graphics-compiler/releases/download/igc-${INTEL_GRAPHICS_COMPILER_VERSION}/intel-igc-opencl_${INTEL_GRAPHICS_COMPILER_VERSION}_amd64.deb && \
-        mkdir -p ${DIR}/SPIRV-LLVM-Translator && \
-        mkdir -p ${DIR}/SPIRV-Tools && \
-        mkdir -p ${DIR}/SPIRV-Headers && \
-        mkdir -p ${DIR}/vc-intrinsics && \
-        mkdir -p ${DIR}/igc && \
-        git clone --branch llvm_release_${LLVM_VERSION}0 https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git ${DIR}/SPIRV-LLVM-Translator && \
-        git clone --branch main https://github.com/KhronosGroup/SPIRV-Tools.git ${DIR}/SPIRV-Tools && \
-        git clone --branch main https://github.com/KhronosGroup/SPIRV-Headers.git ${DIR}/SPIRV-Headers && \
-        git clone --branch master https://github.com/intel/vc-intrinsics.git ${DIR}/vc-intrinsics && \
-        git clone --branch igc-${INTEL_GRAPHICS_COMPILER_VERSION} https://github.com/intel/intel-graphics-compiler.git ${DIR}/igc && \
-        cd ${DIR}/SPIRV-LLVM-Translator && \
-        echo 'set(CPACK_GENERATOR "DEB")' >> CMakeLists.txt && echo 'set(CPACK_DEBIAN_PACKAGE_MAINTAINER "David Doria") # required' >> CMakeLists.txt && echo 'include(CPack)' >> CMakeLists.txt && \
-        mkdir build && cd build && \
-        cmake .. -DBASE_LLVM_VERSION="${LLVM_VERSION}.0.0" && \
-        make llvm-spirv && \
-        cpack && \
-        cp *.deb ${DIR} && \
-        cd ${DIR} && \
-        dpkg -i *.deb && \
-        mv /usr/lib/libLLVMSPIRVLib.a /usr/local/lib/libLLVMSPIRVLib.a && \
-        mkdir build && \
-        cd build && \
-        cmake ../igc -DIGC_OPTION__LLVM_MODE=Prebuilds -DIGC_OPTION__LLVM_PREFERRED_VERSION=${LLVM_VERSION}.0.0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" && \
-        make && \
-        make install && \
-        ldconfig && \
-        dpkg -r intel-igc-core intel-igc-opencl llvm_spirv && \
-        rm -rf ${DIR}
-
 ## intel-opencl-icd
-RUN \ 
+RUN \
+        apt-get install -y ocl-icd-libopencl1 && \
         DIR=/tmp/intel-opencl-icd && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
         curl -sLO https://github.com/intel/compute-runtime/archive/${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f ${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         mkdir build && cd build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DNEO__GMM_LIBRARY="${PREFIX}/lib" -DNEO__GMM_INCLUDE_DIR="${PREFIX}/include" .. && \
+        curl -s https://api.github.com/repos/intel/compute-runtime/releases/tags/${INTEL_OPENCL_ICD_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
+        curl -s https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/igc-${INTEL_GRAPHICS_COMPILER_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
+        dpkg -i *.deb && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
         make install && \
+        dpkg -r intel-opencl-icd intel-igc-* intel-level-zero-gpu libigdgmm* && \
         ldconfig && \
         rm -rf ${DIR}
 
@@ -857,11 +823,11 @@ RUN \
         cp ${PREFIX}/bin/* /usr/local/bin/ && \
         cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
         cp -r ${PREFIX}/lib/* /usr/local/lib/ && \
+        cp -r ${PREFIX}/include/* /usr/local/include/ && \
         LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
-        cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
         find /usr/local/lib/ -path "*/pkgconfig/*.pc" | while read PCFILE; do \
           echo "Updating ${PREFIX} to /usr/local in $PCFILE" && \
-          sed -i "s|^prefix=${PREFIX}$|prefix=/usr/local|" $PCFILE; \
+          sed -i "s|${PREFIX}|/usr/local|" $PCFILE; \
         done
 
 FROM        base AS release

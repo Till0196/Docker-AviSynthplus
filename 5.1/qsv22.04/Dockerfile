@@ -728,11 +728,11 @@ RUN \
         cp ${PREFIX}/bin/* /usr/local/bin/ && \
         cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
         cp -r ${PREFIX}/lib/* /usr/local/lib/ && \
+        cp -r ${PREFIX}/include/* /usr/local/include/ && \
         LD_LIBRARY_PATH=/usr/local/lib ffmpeg -buildconf && \
-        cp -r ${PREFIX}/include/libav* ${PREFIX}/include/libpostproc ${PREFIX}/include/libsw* /usr/local/include && \
-        mkdir -p /usr/local/lib/pkgconfig && \
-        for pc in ${PREFIX}/lib/pkgconfig/libav*.pc ${PREFIX}/lib/pkgconfig/libpostproc.pc ${PREFIX}/lib/pkgconfig/libsw*.pc; do \
-          sed "s:${PREFIX}:/usr/local:g; s:/lib64:/lib:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
+        find /usr/local/lib/ -path "*/pkgconfig/*.pc" | while read PCFILE; do \
+          echo "Updating ${PREFIX} to /usr/local in $PCFILE" && \
+          sed -i "s|${PREFIX}|/usr/local|" $PCFILE; \
         done
 
 FROM        base AS release
