@@ -16,6 +16,7 @@ ENV         FFMPEG_VERSION=5.1 \
             CHROMAPRINT_VERSION=1.5.0 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.12.4 \
+            LIBBZIP2_VERSION=1.0.8 \
             FREETYPE_VERSION=2-13-2 \
             FRIBIDI_VERSION=1.0.13 \
             KVAZAAR_VERSION=2.0.0 \
@@ -220,6 +221,17 @@ RUN \
         make && \
         make install && \
         rm -rf ${DIR}
+## libpng
+RUN \
+        DIR=/tmp/png && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        git clone https://git.code.sf.net/p/libpng/code ${DIR} -b v${LIBPNG_VERSION} --depth 1 && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" && \
+        make check && \
+        make install && \
+        rm -rf ${DIR}
 ### libwebp https://developers.google.com/speed/webp/
 RUN \
         DIR=/tmp/vebp && \
@@ -266,13 +278,22 @@ RUN \
         make && \
         make install && \
         rm -rf ${DIR}
+## libbzip2 https://sourceware.org/bzip2/
+RUN \
+        DIR=/tmp/bzip2 && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sLO https://sourceware.org/pub/bzip2/bzip2-${LIBBZIP2_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f bzip2-${LIBBZIP2_VERSION}.tar.gz && \
+        make && \
+        make install PREFIX="${PREFIX}" && \
+        rm -rf ${DIR}
 ## freetype https://www.freetype.org/
 RUN  \
-        apt-get install -y libbz2-dev libpng-dev && \
         DIR=/tmp/freetype && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE_VERSION}/freetype-VER-${FREETYPE_VERSION}.tar.gz && \
+        git clone --branch VER-${FREETYPE_VERSION} --depth 1 https://gitlab.freedesktop.org/freetype/freetype.git --recursive ${DIR} && \
         tar -zx --strip-components=1 -f freetype-VER-${FREETYPE_VERSION}.tar.gz && \
         mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=0 -DFT_REQUIRE_ZLIB=1 -DFT_REQUIRE_BZIP2=1 -DFT_REQUIRE_PNG=1 -DFT_DISABLE_HARFBUZZ=1 .. && \
@@ -469,18 +490,6 @@ RUN \
         tar -xz --strip-components=1 -f v${LIBSRT_VERSION}.tar.gz && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" . && \
         make && \
-        make install && \
-        rm -rf ${DIR}
-
-## libpng
-RUN \
-        DIR=/tmp/png && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        git clone https://git.code.sf.net/p/libpng/code ${DIR} -b v${LIBPNG_VERSION} --depth 1 && \
-        ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" && \
-        make check && \
         make install && \
         rm -rf ${DIR}
 
