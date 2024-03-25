@@ -689,7 +689,7 @@ RUN \
         curl -sLO https://github.com/intel/compute-runtime/archive/${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         tar -xz --strip-components=1 -f ${INTEL_OPENCL_ICD_VERSION}.tar.gz && \
         mkdir build && cd build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DNEO__GMM_LIBRARY="${PREFIX}/lib" -DNEO__GMM_INCLUDE_DIR="${PREFIX}/include" .. && \
         make && \
         make install && \
         ldconfig && \
