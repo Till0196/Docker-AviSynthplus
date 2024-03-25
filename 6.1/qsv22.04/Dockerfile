@@ -16,7 +16,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             CHROMAPRINT_VERSION=1.5.0 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.12.4 \
-            FREETYPE_VERSION=2-10-4 \
+            FREETYPE_VERSION=2-13-2 \
             FRIBIDI_VERSION=0.19.7 \
             KVAZAAR_VERSION=2.0.0 \
             LAME_VERSION=3.100 \
@@ -274,7 +274,7 @@ RUN  \
         cd ${DIR} && \
         curl -sLO https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE_VERSION}/freetype-VER-${FREETYPE_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f freetype-VER-${FREETYPE_VERSION}.tar.gz && \
-        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
+        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=0 -DFT_REQUIRE_ZLIB=1 -DFT_REQUIRE_BZIP2=1 -DFT_REQUIRE_PNG=1 -DFT_DISABLE_HARFBUZZ=1 && \
         make && \
         make install && \
         rm -rf ${DIR}
