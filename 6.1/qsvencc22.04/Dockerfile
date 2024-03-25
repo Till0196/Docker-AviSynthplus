@@ -16,7 +16,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             CHROMAPRINT_VERSION=1.5.0 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.12.4 \
-            FREETYPE_VERSION=2.10.4 \
+            FREETYPE_VERSION=2-10-4 \
             FRIBIDI_VERSION=0.19.7 \
             KVAZAAR_VERSION=2.0.0 \
             LAME_VERSION=3.100 \
@@ -276,8 +276,7 @@ RUN  \
         DIR=/tmp/freetype && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        curl -sLO https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz && \
-        echo ${FREETYPE_SHA256SUM} | sha256sum --check && \
+        curl -sLO https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE_VERSION}/freetype-VER-${FREETYPE_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f freetype-${FREETYPE_VERSION}.tar.gz && \
         ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
@@ -653,11 +652,14 @@ RUN \
         mkdir build && cd build && \
         curl -s https://api.github.com/repos/intel/compute-runtime/releases/tags/${INTEL_OPENCL_ICD_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
         curl -s https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/igc-${INTEL_GRAPHICS_COMPILER_VERSION} | grep browser_download_url | egrep '.*\.deb' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
+        for file in *.deb; do \
+          dpkg-deb -I "$file" | grep -Po "(?<=Package: ).*" \
+        done > prebuild.txt && \
         dpkg -i *.deb && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${PREFIX}" .. && \
         make && \
         make install && \
-        dpkg -r intel-opencl-icd intel-igc-* intel-level-zero-gpu libigdgmm* && \
+        cat prebuilds.txt | xargs dpkg -r && \
         ldconfig && \
         rm -rf ${DIR}
 
