@@ -278,6 +278,7 @@ RUN  \
         cd ${DIR} && \
         curl -sLO https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-${FREETYPE_VERSION}/freetype-VER-${FREETYPE_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f freetype-VER-${FREETYPE_VERSION}.tar.gz && \
+        mkdir build && cd build && \
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DBUILD_SHARED_LIBS=0 -DFT_REQUIRE_ZLIB=1 -DFT_REQUIRE_BZIP2=1 -DFT_REQUIRE_PNG=1 -DFT_DISABLE_HARFBUZZ=1 && \
         make && \
         make install && \
