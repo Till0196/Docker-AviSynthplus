@@ -857,6 +857,8 @@ ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
 RUN \
+        INTEL_GRAPHICS_COMPILER_VERSION=1.0.15985.7 && \
+        INTEL_OPENCL_ICD_VERSION=24.05.28454.6 && \
         apt-get install -y ocl-icd-libopencl1 curl && \
         curl -s https://api.github.com/repos/intel/compute-runtime/releases/tags/${INTEL_OPENCL_ICD_VERSION} | grep browser_download_url | egrep '.*\.deb' | egrep -v 'devel|dev' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
         curl -s https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/igc-${INTEL_GRAPHICS_COMPILER_VERSION} | grep browser_download_url |egrep '.*\.deb' | egrep -v 'devel|dev' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
