@@ -856,4 +856,10 @@ CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
-
+RUN \
+        apt-get install -y ocl-icd-libopencl1 curl && \
+        curl -s https://api.github.com/repos/intel/compute-runtime/releases/tags/${INTEL_OPENCL_ICD_VERSION} | grep browser_download_url | egrep '.*\.deb' | egrep -v 'devel|dev' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
+        curl -s https://api.github.com/repos/intel/intel-graphics-compiler/releases/tags/igc-${INTEL_GRAPHICS_COMPILER_VERSION} | grep browser_download_url |egrep '.*\.deb' | egrep -v 'devel|dev' | cut -d '"' -f 4 | xargs -n 1 curl -sLO && \
+        dpkg -i *.deb && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* *.deb
