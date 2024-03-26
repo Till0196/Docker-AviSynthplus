@@ -17,7 +17,7 @@ ENV         FFMPEG_VERSION=6.1.1 \
             FDKAAC_VERSION=0.1.5 \
             FONTCONFIG_VERSION=2.15.0 \
             LIBBZIP2_VERSION=1.0.8 \
-            FREETYPE_VERSION=2-13-2 \
+            FREETYPE_VERSION=2.13.2 \
             FRIBIDI_VERSION=1.0.13 \
             KVAZAAR_VERSION=2.0.0 \
             LAME_VERSION=3.100 \
@@ -290,17 +290,24 @@ RUN \
         cd ${DIR} && \
         curl -sLO https://sourceware.org/pub/bzip2/bzip2-${LIBBZIP2_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f bzip2-${LIBBZIP2_VERSION}.tar.gz && \
-        make && \
+        make -f Makefile-libbz2_so clean && \
+        make -f Makefile-libbz2_so && \
         make install PREFIX="${PREFIX}" && \
+        find . -type f -name 'libbz2.so.*' -print0 | xargs -0 -n1 install -m 644 -t ${PREFIX}/lib && \
+        find . -type l -name 'libbz2.so.*' -print0 | xargs -0 -I {} cp -p -r {} ${PREFIX}/lib && \
+        echo -e "prefix=${PREFIX}\nexec_prefix=\${prefix}\nbindir=\${exec_prefix}/bin\nlibdir=\${exec_prefix}/lib\nincludedir=\${prefix}/include\n \
+        \nName: bzip2\nDescription: A file compression library\nVersion: ${LIBBZIP2_VERSION}\n \
+        \nLibs: -L\${libdir} -lbz2\nCflags: -I\${includedir}" > ${PREFIX}/lib/pkgconfig/bzip2.pc && \
+        ldconfig && \
         rm -rf ${DIR}
 ## freetype https://www.freetype.org/
 RUN  \
         DIR=/tmp/freetype && \
         mkdir -p ${DIR} && \
         cd ${DIR} && \
-        git clone --branch VER-${FREETYPE_VERSION} --depth 1 https://gitlab.freedesktop.org/freetype/freetype.git --recursive ${DIR} && \
-        mkdir build && cd build && \
-        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=0 -DFT_REQUIRE_ZLIB=1 -DFT_REQUIRE_BZIP2=1 -DFT_REQUIRE_PNG=1 -DFT_DISABLE_HARFBUZZ=1 .. && \
+        curl -sLO https://downloads.sourceforge.net/project/freetype/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz && \
+        tar -zx --strip-components=1 -f freetype-${FREETYPE_VERSION}.tar.gz && \
+        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -334,7 +341,7 @@ RUN  \
         cd ${DIR} && \
         curl -sLO https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f fontconfig-${FONTCONFIG_VERSION}.tar.gz && \
-        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -347,7 +354,7 @@ RUN  \
         echo ${LIBASS_SHA256SUM} | sha256sum --check && \
         tar -zx --strip-components=1 -f ${LIBASS_VERSION}.tar.gz && \
         ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -359,7 +366,7 @@ RUN \
         curl -sLO https://github.com/ultravideo/kvazaar/archive/v${KVAZAAR_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f v${KVAZAAR_VERSION}.tar.gz && \
         ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -452,7 +459,7 @@ RUN \
         cd ${DIR} && \
         curl -sL https://github.com/GNOME/libxml2/archive/refs/tags/v${LIBXML2_VERSION}.tar.gz | \
         tar -xz --strip-components=1 && \
-        ./autogen.sh --prefix="${PREFIX}" --with-ftp=no --with-http=no --with-python=no && \
+        ./autogen.sh --prefix="${PREFIX}" --with-ftp=no --with-http=no --with-python=no --enable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -464,7 +471,7 @@ RUN \
         cd ${DIR} && \
         curl -sLO https://download.videolan.org/pub/videolan/libbluray/${LIBBLURAY_VERSION}/libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
         tar -jx --strip-components=1 -f libbluray-${LIBBLURAY_VERSION}.tar.bz2 && \
-        ./configure --prefix="${PREFIX}" --disable-examples --disable-bdjava-jar --enable-static --disable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-examples --disable-bdjava-jar --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
@@ -669,6 +676,19 @@ RUN \
         ldconfig && \
         rm -rf ${DIR}
 
+# zimg  https://github.com/sekrit-twc/zimg
+RUN \
+        DIR=/tmp/zimg && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sL https://github.com/sekrit-twc/zimg/archive/refs/tags/release-${ZIMG_VERSION}.tar.gz | \
+        tar -zx --strip-components=1 && \
+        ./autogen.sh && \
+        ./configure --prefix="${PREFIX}" --enable-shared  && \
+        make && \
+        make install && \
+        rm -rf ${DIR}
+
 ## vapoursynth
 RUN \
         apt-get install -y python3-pip && \
@@ -698,19 +718,6 @@ RUN     set -xe && \
         ninja && \
         ninja install && \
         ldconfig && \
-        rm -rf ${DIR}
-
-# zimg  https://github.com/sekrit-twc/zimg
-RUN \
-        DIR=/tmp/zimg && \
-        mkdir -p ${DIR} && \
-        cd ${DIR} && \
-        curl -sL https://github.com/sekrit-twc/zimg/archive/refs/tags/release-${ZIMG_VERSION}.tar.gz | \
-        tar -zx --strip-components=1 && \
-        ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --enable-shared  && \
-        make && \
-        make install && \
         rm -rf ${DIR}
 
 ## Download ffmpeg https://ffmpeg.org/
