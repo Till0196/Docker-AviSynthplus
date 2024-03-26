@@ -697,6 +697,7 @@ RUN \
         cd ${DIR} && \
         curl -sLO https://github.com/vapoursynth/vapoursynth/archive/R${VAPOURSYNTH_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f R${VAPOURSYNTH_VERSION}.tar.gz && \
+        pip install -U cython setuptools wheel && \
         ./autogen.sh && \
         ./configure --prefix="${PREFIX}" && \
         make && \
