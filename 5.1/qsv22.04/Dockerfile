@@ -361,7 +361,7 @@ RUN \
         curl -sLO https://github.com/ultravideo/kvazaar/archive/v${KVAZAAR_VERSION}.tar.gz && \
         tar -zx --strip-components=1 -f v${KVAZAAR_VERSION}.tar.gz && \
         ./autogen.sh && \
-        ./configure --prefix="${PREFIX}" --enable-static --disable-shared && \
+        ./configure --prefix="${PREFIX}" --disable-static --enable-shared && \
         make && \
         make install && \
         rm -rf ${DIR}
